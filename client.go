@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -46,21 +47,28 @@ func newClient(token, dCookie, dsCookie string) (*slackClient, error) {
 	client := &http.Client{
 		Jar: jar,
 	}
-	return &slackClient{slack.New(token, slack.OptionHTTPClient(client))}, nil
+	sc := slack.New(token,
+		slack.OptionHTTPClient(client),
+		slack.OptionDebug(true),
+		slack.OptionLog(log.New(os.Stdout, "slack-bot: ", log.Lshortfile|log.LstdFlags)))
+	return &slackClient{sc}, nil
 }
 
 type slackClient struct {
 	*slack.Client
 }
 
-func (s *slackClient) listConversations(ctx context.Context) []string {
+func (s *slackClient) listConversations(ctx context.Context, types ...string) []string {
 	var (
 		result   []string
 		channels []slack.Channel
 		err      error
 	)
+	if len(types) == 0 {
+		types = []string{"public_channel", "private_channel", "mpim", "im"}
+	}
 	params := &slack.GetConversationsParameters{
-		Types: []string{"public_channel", "private_channel", "mpim", "im"},
+		Types: types,
 	}
 	for err == nil {
 		for _, channel := range channels {
@@ -101,4 +109,10 @@ func (s *slackClient) dumpConversation(ctx context.Context, conversationID strin
 
 func (s *slackClient) listUsers(ctx context.Context) ([]slack.User, error) {
 	return s.Client.GetUsersContext(ctx)
+}
+
+func (s *slackClient) sendMessage(ctx context.Context, channelID, message string) error {
+	a, b, err := s.Client.PostMessageContext(ctx, channelID, slack.MsgOptionText(message, false))
+	fmt.Println(a, b, err)
+	return err
 }

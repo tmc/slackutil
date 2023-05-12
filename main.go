@@ -26,7 +26,9 @@ func init() {
 
 	RootCmd.AddCommand(ListConversationsCmd)
 	RootCmd.AddCommand(ListUsersCmd)
+	RootCmd.AddCommand(ListDMsCmd)
 	RootCmd.AddCommand(DumpConversationCmd)
+	RootCmd.AddCommand(SendMessageCmd)
 }
 
 func run(ctx context.Context, opts Options) error {
@@ -79,6 +81,21 @@ var ListConversationsCmd = &cobra.Command{
 	},
 }
 
+var ListDMsCmd = &cobra.Command{
+	Use:   "list-dms",
+	Short: "list-dms",
+	Long:  `list-dms`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
+		c, err := newClientFromFlags(cmd)
+		if err != nil {
+			return err
+		}
+		c.listConversations(ctx, "im")
+		return nil
+	},
+}
+
 var DumpConversationCmd = &cobra.Command{
 	Use:   "dump-conversation",
 	Short: "dump-conversation",
@@ -114,5 +131,20 @@ var ListUsersCmd = &cobra.Command{
 			fmt.Println(string(j))
 		}
 		return nil
+	},
+}
+
+var SendMessageCmd = &cobra.Command{
+	Use:   "send-msg",
+	Short: "send-msg",
+	Long:  `send-msg`,
+	Args:  cobra.ExactArgs(2),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
+		c, err := newClientFromFlags(cmd)
+		if err != nil {
+			return err
+		}
+		return c.sendMessage(ctx, args[0], args[1])
 	},
 }
