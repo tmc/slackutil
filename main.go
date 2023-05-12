@@ -80,7 +80,9 @@ func (c *slackClient) listConversations(ctx context.Context) []string {
 		channels []slack.Channel
 		err      error
 	)
-	params := &slack.GetConversationsParameters{}
+	params := &slack.GetConversationsParameters{
+		Types: []string{"public_channel", "private_channel", "mpim", "im"},
+	}
 	for err == nil {
 		for _, channel := range channels {
 			result = append(result, channel.Name)
