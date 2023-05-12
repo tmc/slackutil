@@ -11,8 +11,10 @@ Usage:
 
 Available Commands:
   completion         Generate the autocompletion script for the specified shell
+  dump-conversation  dump-conversation
   help               Help about any command
   list-conversations list-conversations
+  list-users         list-users
 
 Flags:
   -d, --d-cookie string    'd' cookie value
