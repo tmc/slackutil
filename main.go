@@ -68,9 +68,10 @@ func run() error {
 	}
 	ctx := context.Background()
 	conversations := client.listConversations(ctx)
-	for _, c := range conversations {
-		fmt.Printf("%s\n", c)
-	}
+	_ = conversations
+	// for _, c := range conversations {
+	// 	fmt.Printf("%s\n", c)
+	// }
 	return nil
 }
 
@@ -86,6 +87,7 @@ func (c *slackClient) listConversations(ctx context.Context) []string {
 	for err == nil {
 		for _, channel := range channels {
 			result = append(result, channel.Name)
+			fmt.Println(channel.Name)
 		}
 		channels, params.Cursor, err = c.Client.GetConversations(params)
 	}
