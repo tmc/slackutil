@@ -26,7 +26,7 @@ func main() {
 	}
 }
 
-func newClient(token, dCookie, dsCookie string) (*slack.Client, error) {
+func newClient(token, dCookie, dsCookie string) (*slackClient, error) {
 	if dCookie == "" {
 		return nil, fmt.Errorf("d cookie flag is required")
 	}
@@ -54,7 +54,11 @@ func newClient(token, dCookie, dsCookie string) (*slack.Client, error) {
 	client := &http.Client{
 		Jar: jar,
 	}
-	return slack.New(token, slack.OptionHTTPClient(client)), nil
+	return &slackClient{slack.New(token, slack.OptionHTTPClient(client))}, nil
+}
+
+type slackClient struct {
+	*slack.Client
 }
 
 func run() error {
@@ -63,8 +67,27 @@ func run() error {
 		return err
 	}
 	ctx := context.Background()
-	fmt.Println(client.GetConversationsContext(ctx, &slack.GetConversationsParameters{}))
+	conversations := client.listConversations(ctx)
+	for _, c := range conversations {
+		fmt.Printf("%s\n", c)
+	}
 	return nil
+}
+
+func (c *slackClient) listConversations(ctx context.Context) []string {
+	var (
+		result   []string
+		channels []slack.Channel
+		err      error
+	)
+	params := &slack.GetConversationsParameters{}
+	for err == nil {
+		for _, channel := range channels {
+			result = append(result, channel.Name)
+		}
+		channels, params.Cursor, err = c.Client.GetConversations(params)
+	}
+	return result
 }
 
 func getSlackToken(cookie string) (string, error) {
