@@ -2,12 +2,32 @@
 
 Dumps info from slack.
 
+```shell
+slackdump
+
+Usage:
+  slackdump [flags]
+  slackdump [command]
+
+Available Commands:
+  completion         Generate the autocompletion script for the specified shell
+  help               Help about any command
+  list-conversations list-conversations
+
 Flags:
+  -d, --d-cookie string    'd' cookie value
+  -s, --ds-cookie string   'd-s' cookie value
+  -h, --help               help for slackdump
+  -t, --token string       slack token (see readme)
 
-* -d='(value of your d cookie)
-* -d-s='(value of your d-s cookie)'
-* -token='(value of the results of the browser console command to run listed below)'
+Use "slackdump [command] --help" for more information about a command.
+```
 
+Flags Descriptions:
+
+* `--d-cookie='(value of your d cookie)`
+* `--ds-cookie='(value of your d-s cookie)'`
+* `--token='(value of the results of the browser console command to run listed below)'`
 
 Console command:
 
