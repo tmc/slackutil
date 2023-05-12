@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -24,6 +25,8 @@ func init() {
 	RootCmd.MarkPersistentFlagRequired("token")
 
 	RootCmd.AddCommand(ListConversationsCmd)
+	RootCmd.AddCommand(ListUsersCmd)
+	RootCmd.AddCommand(DumpConversationCmd)
 }
 
 func run(ctx context.Context, opts Options) error {
@@ -66,13 +69,50 @@ var ListConversationsCmd = &cobra.Command{
 	Short: "list-conversations",
 	Long:  `list-conversations`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("listing")
 		ctx := context.Background()
 		c, err := newClientFromFlags(cmd)
 		if err != nil {
 			return err
 		}
 		c.listConversations(ctx)
+		return nil
+	},
+}
+
+var DumpConversationCmd = &cobra.Command{
+	Use:   "dump-conversation",
+	Short: "dump-conversation",
+	Long:  `dump-conversation`,
+	Args:  cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
+		c, err := newClientFromFlags(cmd)
+		if err != nil {
+			return err
+		}
+		c.dumpConversation(ctx, args[0])
+		return nil
+	},
+}
+
+var ListUsersCmd = &cobra.Command{
+	Use:   "list-users",
+	Short: "list-users",
+	Long:  `list-users`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
+		c, err := newClientFromFlags(cmd)
+		if err != nil {
+			return err
+		}
+		users, err := c.listUsers(ctx)
+		if err != nil {
+			return err
+		}
+		for _, u := range users {
+			j, _ := json.Marshal(u)
+			fmt.Println(string(j))
+		}
 		return nil
 	},
 }

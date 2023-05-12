@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
+	"os"
 
 	"github.com/slack-go/slack"
 )
@@ -52,15 +53,14 @@ type slackClient struct {
 	*slack.Client
 }
 
-func (c *slackClient) listConversations(ctx context.Context) []string {
+func (s *slackClient) listConversations(ctx context.Context) []string {
 	var (
 		result   []string
 		channels []slack.Channel
 		err      error
 	)
 	params := &slack.GetConversationsParameters{
-		Types: []string{"im"},
-		// Types: []string{"public_channel", "private_channel", "mpim", "im"},
+		Types: []string{"public_channel", "private_channel", "mpim", "im"},
 	}
 	for err == nil {
 		for _, channel := range channels {
@@ -68,7 +68,37 @@ func (c *slackClient) listConversations(ctx context.Context) []string {
 			j, _ := json.Marshal(channel)
 			fmt.Println(string(j))
 		}
-		channels, params.Cursor, err = c.Client.GetConversations(params)
+		channels, params.Cursor, err = s.Client.GetConversations(params)
 	}
 	return result
+}
+
+func (s *slackClient) dumpConversation(ctx context.Context, conversationID string) []string {
+	var (
+		result   []string
+		channels []slack.Channel
+	)
+	params := &slack.GetConversationHistoryParameters{
+		ChannelID:          conversationID,
+		IncludeAllMetadata: true,
+	}
+	hasMore := true
+	for hasMore {
+		for _, channel := range channels {
+			result = append(result, channel.Name)
+			j, _ := json.Marshal(channel)
+			fmt.Println(string(j))
+		}
+		hist, err := s.Client.GetConversationHistoryContext(ctx, params)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return result
+		}
+		params.Cursor = hist.ResponseMetaData.NextCursor
+	}
+	return result
+}
+
+func (s *slackClient) listUsers(ctx context.Context) ([]slack.User, error) {
+	return s.Client.GetUsersContext(ctx)
 }
