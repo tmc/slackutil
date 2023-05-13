@@ -21,6 +21,8 @@ func init() {
 	RootCmd.AddCommand(ListDMsCmd)
 	RootCmd.AddCommand(DumpConversationCmd)
 	RootCmd.AddCommand(SendMessageCmd)
+
+	DumpConversationCmd.Flags().IntP("limit", "l", 0, "limit number of messages to dump")
 }
 
 var RootCmd = &cobra.Command{
@@ -35,8 +37,8 @@ var RootCmd = &cobra.Command{
 
 var ListConversationsCmd = &cobra.Command{
 	Use:   "list-conversations",
-	Short: "list-conversations",
-	Long:  `list-conversations`,
+	Short: "List conversations",
+	Long:  "List conversations",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		c, err := newClientFromFlags(cmd)
@@ -65,16 +67,17 @@ var ListDMsCmd = &cobra.Command{
 
 var DumpConversationCmd = &cobra.Command{
 	Use:   "dump-conversation",
-	Short: "dump-conversation",
-	Long:  `dump-conversation`,
+	Short: "Dump conversation history",
+	Long:  "Dump conversation history",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
+		limit, _ := cmd.Flags().GetInt("limit")
 		c, err := newClientFromFlags(cmd)
 		if err != nil {
 			return err
 		}
-		c.dumpConversation(ctx, args[0])
+		c.dumpConversation(ctx, args[0], limit)
 		return nil
 	},
 }
