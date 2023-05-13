@@ -81,30 +81,28 @@ func (s *slackClient) listConversations(ctx context.Context, types ...string) []
 	return result
 }
 
-func (s *slackClient) dumpConversation(ctx context.Context, conversationID string) []string {
-	var (
-		result   []string
-		channels []slack.Channel
-	)
+// Dumps an entire conversation to stdout
+func (s *slackClient) dumpConversation(ctx context.Context, conversationID string) error {
 	params := &slack.GetConversationHistoryParameters{
 		ChannelID:          conversationID,
 		IncludeAllMetadata: true,
 	}
+
 	hasMore := true
 	for hasMore {
-		for _, channel := range channels {
-			result = append(result, channel.Name)
-			j, _ := json.Marshal(channel)
-			fmt.Println(string(j))
-		}
 		hist, err := s.Client.GetConversationHistoryContext(ctx, params)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			return result
+			return err
+		}
+		// Loop that iterates over the messages
+		for _, m := range hist.Messages {
+			j, _ := json.Marshal(m)
+			fmt.Println(string(j))
 		}
 		params.Cursor = hist.ResponseMetaData.NextCursor
+		hasMore = hist.HasMore
 	}
-	return result
+	return nil
 }
 
 func (s *slackClient) listUsers(ctx context.Context) ([]slack.User, error) {
