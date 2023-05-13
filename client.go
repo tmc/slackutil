@@ -17,10 +17,12 @@ type Options struct {
 	Token    string
 	DCookie  string
 	DSCookie string
+
+	Verbose bool
 }
 
-func newClient(token, dCookie, dsCookie string) (*slackClient, error) {
-	if dCookie == "" {
+func newClient(opts Options) (*slackClient, error) {
+	if opts.DCookie == "" {
 		return nil, fmt.Errorf("d cookie flag is required")
 	}
 	jar, _ := cookiejar.New(nil)
@@ -28,17 +30,17 @@ func newClient(token, dCookie, dsCookie string) (*slackClient, error) {
 	jar.SetCookies(url, []*http.Cookie{
 		{
 			Name:   "d",
-			Value:  dCookie,
+			Value:  opts.DCookie,
 			Path:   "/",
 			Domain: "slack.com",
 		},
 	})
 
-	if dsCookie != "" {
+	if opts.DSCookie != "" {
 		jar.SetCookies(url, []*http.Cookie{
 			{
 				Name:   "d-s",
-				Value:  dsCookie,
+				Value:  opts.DSCookie,
 				Path:   "/",
 				Domain: "slack.com",
 			},
@@ -47,15 +49,20 @@ func newClient(token, dCookie, dsCookie string) (*slackClient, error) {
 	client := &http.Client{
 		Jar: jar,
 	}
-	sc := slack.New(token,
+	sc := slack.New(opts.Token,
 		slack.OptionHTTPClient(client),
-		slack.OptionDebug(true),
+		slack.OptionDebug(opts.Verbose),
 		slack.OptionLog(log.New(os.Stdout, "slack-bot: ", log.Lshortfile|log.LstdFlags)))
-	return &slackClient{sc}, nil
+	return &slackClient{
+		Client:              sc,
+		conversationHistory: make(map[string][]slack.Message),
+	}, nil
 }
 
 type slackClient struct {
 	*slack.Client
+
+	conversationHistory map[string][]slack.Message
 }
 
 func (s *slackClient) listConversations(ctx context.Context, types ...string) []string {
@@ -82,7 +89,8 @@ func (s *slackClient) listConversations(ctx context.Context, types ...string) []
 }
 
 // Dumps an entire conversation to stdout
-func (s *slackClient) dumpConversation(ctx context.Context, conversationID string, limit int) error {
+func (s *slackClient) dumpConversation(ctx context.Context, conversationID string, limit int) ([]slack.Message, error) {
+	result := []slack.Message{}
 	params := &slack.GetConversationHistoryParameters{
 		ChannelID:          conversationID,
 		IncludeAllMetadata: true,
@@ -93,21 +101,22 @@ func (s *slackClient) dumpConversation(ctx context.Context, conversationID strin
 	for hasMore {
 		hist, err := s.Client.GetConversationHistoryContext(ctx, params)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		// Loop that iterates over the messages
 		for _, m := range hist.Messages {
-			j, _ := json.Marshal(m)
-			fmt.Println(string(j))
+			//j, _ := json.Marshal(m)
+			//fmt.Println(string(j))
+			result = append(result, m)
 			i++
 			if limit > 0 && i >= limit {
-				return nil
+				return result, nil
 			}
 		}
 		params.Cursor = hist.ResponseMetaData.NextCursor
 		hasMore = hist.HasMore
 	}
-	return nil
+	return result, nil
 }
 
 func (s *slackClient) listUsers(ctx context.Context) ([]slack.User, error) {

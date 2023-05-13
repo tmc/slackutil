@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"os"
 
@@ -13,15 +12,6 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-}
-
-func run(ctx context.Context, opts Options) error {
-	client, err := newClient(opts.Token, opts.DCookie, opts.DSCookie)
-	if err != nil {
-		return err
-	}
-	client.listConversations(ctx)
-	return nil
 }
 
 func newClientFromFlags(cmd *cobra.Command) (*slackClient, error) {
@@ -37,5 +27,6 @@ func newClientFromFlags(cmd *cobra.Command) (*slackClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	return newClient(t, d, ds)
+	verbose, _ := cmd.Flags().GetBool("verbose")
+	return newClient(Options{Token: t, DCookie: d, DSCookie: ds, Verbose: verbose})
 }

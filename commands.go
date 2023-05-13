@@ -9,6 +9,7 @@ import (
 )
 
 func init() {
+	RootCmd.PersistentFlags().BoolP("verbose", "v", false, "verbose mode")
 	RootCmd.PersistentFlags().StringP("d-cookie", "d", "", "'d' cookie value")
 	RootCmd.PersistentFlags().StringP("ds-cookie", "s", "", "'d-s' cookie value")
 	RootCmd.PersistentFlags().StringP("token", "t", "", "slack token (see readme)")
@@ -21,6 +22,7 @@ func init() {
 	RootCmd.AddCommand(ListDMsCmd)
 	RootCmd.AddCommand(DumpConversationCmd)
 	RootCmd.AddCommand(SendMessageCmd)
+	RootCmd.AddCommand(AutoRespondCmd)
 
 	DumpConversationCmd.Flags().IntP("limit", "l", 0, "limit number of messages to dump")
 }
@@ -116,5 +118,19 @@ var SendMessageCmd = &cobra.Command{
 			return err
 		}
 		return c.sendMessage(ctx, args[0], args[1])
+	},
+}
+
+var AutoRespondCmd = &cobra.Command{
+	Use:   "auto-respond",
+	Short: "auto-respond",
+	Long:  `auto-respond`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
+		c, err := newClientFromFlags(cmd)
+		if err != nil {
+			return err
+		}
+		return c.autoRespond(ctx)
 	},
 }
