@@ -28,5 +28,7 @@ func newClientFromFlags(cmd *cobra.Command) (*slackClient, error) {
 		return nil, err
 	}
 	verbose, _ := cmd.Flags().GetBool("verbose")
+	// TODO: check for empty strings
+	// TODO: check for properly escaped d-cookie
 	return newClient(Options{Token: t, DCookie: d, DSCookie: ds, Verbose: verbose})
 }

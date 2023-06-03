@@ -10,6 +10,8 @@ import (
 	"net/url"
 	"os"
 
+	"github.com/redis/go-redis/v9"
+
 	"github.com/slack-go/slack"
 )
 
@@ -49,12 +51,23 @@ func newClient(opts Options) (*slackClient, error) {
 	client := &http.Client{
 		Jar: jar,
 	}
+	ctx := context.Background()
 	sc := slack.New(opts.Token,
 		slack.OptionHTTPClient(client),
 		slack.OptionDebug(opts.Verbose),
 		slack.OptionLog(log.New(os.Stdout, "slack-bot: ", log.Lshortfile|log.LstdFlags)))
+
+	rc := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
+	if err := rc.Ping(ctx).Err(); err != nil {
+		panic(err)
+	}
 	return &slackClient{
 		Client:              sc,
+		redisClient:         rc,
 		conversationHistory: make(map[string][]slack.Message),
 	}, nil
 }
@@ -63,6 +76,8 @@ type slackClient struct {
 	*slack.Client
 
 	conversationHistory map[string][]slack.Message
+
+	redisClient *redis.Client
 }
 
 func (s *slackClient) listConversations(ctx context.Context, types ...string) []string {

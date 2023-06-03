@@ -25,6 +25,7 @@ func init() {
 	RootCmd.AddCommand(AutoRespondCmd)
 
 	DumpConversationCmd.Flags().IntP("limit", "l", 0, "limit number of messages to dump")
+	RootCmd.PersistentFlags().BoolP("streaming", "S", false, "streaming mode")
 }
 
 var RootCmd = &cobra.Command{
@@ -92,11 +93,11 @@ var ListUsersCmd = &cobra.Command{
 		ctx := context.Background()
 		c, err := newClientFromFlags(cmd)
 		if err != nil {
-			return err
+			return fmt.Errorf("error creating client: %w", err)
 		}
 		users, err := c.listUsers(ctx)
 		if err != nil {
-			return err
+			return fmt.Errorf("error listing users: %w", err)
 		}
 		for _, u := range users {
 			j, _ := json.Marshal(u)
