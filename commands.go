@@ -74,13 +74,25 @@ var DumpConversationCmd = &cobra.Command{
 	Long:  "Dump conversation history",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		stream, _ := cmd.Flags().GetBool("streaming")
 		ctx := context.Background()
 		limit, _ := cmd.Flags().GetInt("limit")
 		c, err := newClientFromFlags(cmd)
 		if err != nil {
 			return err
 		}
-		c.dumpConversation(ctx, args[0], limit)
+		hist, err := c.dumpConversation(ctx, args[0], streaming, limit)
+		if err != nil {
+			return err
+		}
+		if stream {
+			return nil
+		}
+
+		for _, m := range hist {
+			j, _ := json.Marshal(m)
+			fmt.Println(string(j))
+		}
 		return nil
 	},
 }
@@ -118,7 +130,7 @@ var SendMessageCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		return c.sendMessage(ctx, args[0], args[1])
+		return c.sendMessage(ctx, args[0], "", args[1])
 	},
 }
 

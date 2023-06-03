@@ -104,7 +104,7 @@ func (s *slackClient) listConversations(ctx context.Context, types ...string) []
 }
 
 // Dumps an entire conversation to stdout
-func (s *slackClient) dumpConversation(ctx context.Context, conversationID string, limit int) ([]slack.Message, error) {
+func (s *slackClient) dumpConversation(ctx context.Context, conversationID string, stream bool, limit int) ([]slack.Message, error) {
 	result := []slack.Message{}
 	params := &slack.GetConversationHistoryParameters{
 		ChannelID:          conversationID,
@@ -120,8 +120,10 @@ func (s *slackClient) dumpConversation(ctx context.Context, conversationID strin
 		}
 		// Loop that iterates over the messages
 		for _, m := range hist.Messages {
-			//j, _ := json.Marshal(m)
-			//fmt.Println(string(j))
+			if stream {
+				j, _ := json.Marshal(m)
+				fmt.Println(string(j))
+			}
 			result = append(result, m)
 			i++
 			if limit > 0 && i >= limit {
@@ -138,8 +140,14 @@ func (s *slackClient) listUsers(ctx context.Context) ([]slack.User, error) {
 	return s.Client.GetUsersContext(ctx)
 }
 
-func (s *slackClient) sendMessage(ctx context.Context, channelID, message string) error {
-	a, b, err := s.Client.PostMessageContext(ctx, channelID, slack.MsgOptionText(message, false))
+func (s *slackClient) sendMessage(ctx context.Context, channelID, threadTS, message string) error {
+	opts := []slack.MsgOption{
+		slack.MsgOptionText(message, false),
+	}
+	if threadTS != "" {
+		opts = append(opts, slack.MsgOptionTS(threadTS))
+	}
+	a, b, err := s.Client.PostMessageContext(ctx, channelID, opts...)
 	fmt.Println(a, b, err)
 	return err
 }
