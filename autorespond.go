@@ -113,6 +113,11 @@ func (s *slackClient) handleRTMMessageEvent(ctx context.Context, rtm *slack.RTM,
 		return nil
 	}
 
+	if ev.Msg.SubType == "message_replied" {
+		fmt.Println("ignoring message reply")
+		return nil
+	}
+
 	j, _ := json.Marshal(ev)
 	fmt.Println("not ignoring message:", ev.User, ev.Msg.Type, ev.Msg.SubType, string(j))
 	time.Sleep(time.Second)
@@ -134,7 +139,7 @@ func (s *slackClient) handleRTMMessageEvent(ctx context.Context, rtm *slack.RTM,
 	time.Sleep(time.Second)
 
 	fmt.Println("getting history")
-	h, err := s.dumpConversation(ctx, ev.Channel, 50)
+	h, err := s.dumpConversation(ctx, ev.Channel, false, 50)
 	if err != nil {
 		return err
 	}

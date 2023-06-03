@@ -74,7 +74,7 @@ var DumpConversationCmd = &cobra.Command{
 	Long:  "Dump conversation history",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		stream, _ := cmd.Flags().GetBool("streaming")
+		streaming, _ := cmd.Flags().GetBool("streaming")
 		ctx := context.Background()
 		limit, _ := cmd.Flags().GetInt("limit")
 		c, err := newClientFromFlags(cmd)
@@ -85,7 +85,7 @@ var DumpConversationCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		if stream {
+		if streaming {
 			return nil
 		}
 
