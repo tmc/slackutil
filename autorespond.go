@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"time"
 
 	"github.com/slack-go/slack"
 	"github.com/tmc/langchaingo/llms/openai"
@@ -92,7 +91,6 @@ func (s *slackClient) handleRTMEvent(ctx context.Context, rtm *slack.RTM, msg *s
 
 func (s *slackClient) handleRTMMessageEvent(ctx context.Context, rtm *slack.RTM, ev *slack.MessageEvent) error {
 	fmt.Println("NEW MESSAGE:", ev.User, ev.Channel)
-	time.Sleep(time.Second)
 
 	ok := channelsToRespondIn[ev.Channel]
 	if !ok {
@@ -120,7 +118,6 @@ func (s *slackClient) handleRTMMessageEvent(ctx context.Context, rtm *slack.RTM,
 
 	j, _ := json.Marshal(ev)
 	fmt.Println("not ignoring message:", ev.User, ev.Msg.Type, ev.Msg.SubType, string(j))
-	time.Sleep(time.Second)
 
 	forPy := &msgToPython{
 		Channel:   ev.Channel,
@@ -135,8 +132,6 @@ func (s *slackClient) handleRTMMessageEvent(ctx context.Context, rtm *slack.RTM,
 	s.redisClient.Publish(ctx, "incoming-messages", j)
 
 	rtm.SendMessage(rtm.NewTypingMessage(ev.Channel))
-
-	time.Sleep(time.Second)
 
 	fmt.Println("getting history")
 	h, err := s.dumpConversation(ctx, ev.Channel, false, 50)
