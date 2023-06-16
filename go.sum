@@ -29,6 +29,8 @@ github.com/tmc/langchaingo v0.0.0-20230511003323-b25d560a5b61 h1:9bPskaKd6pXy5rZ
 github.com/tmc/langchaingo v0.0.0-20230511003323-b25d560a5b61/go.mod h1:+xlIsIuxeh3AlHdUCCzd5jeEBKSGePC9y1iPoEeTlrM=
 github.com/tmc/langchaingo v0.0.0-20230530193922-fb062652f841 h1:IVlfKPZzq3W1G+CkhZgN5VjmHnAeB3YqEvxyNPPCZXY=
 github.com/tmc/langchaingo v0.0.0-20230530193922-fb062652f841/go.mod h1:6l1WoyqVDwkv7cFlY3gfcTv8yVowVyuutKv8PGlQCWI=
+github.com/tmc/langchaingo v0.0.0-20230613190213-fbdcf425027a h1:n47VRQDDXnpr4lTQrFAqdxMmBzt3/4FJwf0K94Hh+4k=
+github.com/tmc/langchaingo v0.0.0-20230613190213-fbdcf425027a/go.mod h1:6l1WoyqVDwkv7cFlY3gfcTv8yVowVyuutKv8PGlQCWI=
 golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=

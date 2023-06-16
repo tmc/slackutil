@@ -7,7 +7,7 @@ require (
 	github.com/redis/go-redis/v9 v9.0.5
 	github.com/slack-go/slack v0.12.2
 	github.com/spf13/cobra v1.7.0
-	github.com/tmc/langchaingo v0.0.0-20230530193922-fb062652f841
+	github.com/tmc/langchaingo v0.0.0-20230613190213-fbdcf425027a
 )
 
 require (
